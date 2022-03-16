@@ -36,15 +36,17 @@ async function setup() {
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
   // console.log(poses[0].keypoints[0].y);
-  if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
-    a+=1;
-    print(a);
-    Fall = 1;
+  if (poses && poses.length > 0){
+    if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
+      a+=1;
+      print(a);
+      Fall = 1;
+    }
+    else Fall = 0;
+    y_nose1 = poses[0].keypoints[0].y;
+    y_knee1 = poses[0].keypoints[13].y;
+    y_knee2 = poses[0].keypoints[14].y;
   }
-  else Fall = 0;
-  y_nose1 = poses[0].keypoints[0].y;
-  y_knee1 = poses[0].keypoints[13].y;
-  y_knee2 = poses[0].keypoints[14].y;
   // console.log('y1= ', y_nose1);
   setTimeout(getPoses, 1000);
 }
