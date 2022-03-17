@@ -1,10 +1,18 @@
 let detector;
 let poses;
 let video;
-let y_nose1;
-let y_nose2;
+let x_nose;
+let y_nose;
+// let y_nose2;
+let x_knee1;
 let y_knee1;
+let x_knee2;
 let y_knee2;
+let height = 0;
+let weight = 0;
+let weight1 = 0;
+let weight2 = 0;
+let angle = 0;
 let a = 1;
 let Fall = 0;
 
@@ -37,18 +45,39 @@ async function getPoses(){
   poses = await detector.estimatePoses(video.elt);
   // console.log(poses[0].keypoints[0].y);
   if (poses && poses.length > 0){
-    if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
+    // // First condition
+    // if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
+    //   a+=1;
+    //   print(a);
+    //   Fall = 1;
+    // }
+    // else Fall = 0;
+    // Second condition
+    if(angle > 45){
       a+=1;
       print(a);
       Fall = 1;
     }
     else Fall = 0;
-    y_nose1 = poses[0].keypoints[0].y;
+    height = Math.sqrt((Math.pow(x_knee1 - x_nose,2) + Math.pow(y_knee1 - y_nose,2)));
+    // let a = Math.pow(x_knee1 - x_nose,2);
+    // let b = Math.pow(y_knee1 - y_nose,2);
+    // height = Math.sqrt(a + b);
+    weight1 = Math.abs(x_nose - x_knee1);
+    weight2 = x_nose - x_knee2;
+    // angle = weight1/height;
+    angle = Math.asin(weight1/height);
+    // angle = 3*PI/2;
+    angle = angle * 180 / PI;
+    //console.log(height);
+    x_nose = poses[0].keypoints[0].x;
+    y_nose = poses[0].keypoints[0].y;
+    x_knee1 = poses[0].keypoints[13].x;
     y_knee1 = poses[0].keypoints[13].y;
+    x_knee2 = poses[0].keypoints[14].x;
     y_knee2 = poses[0].keypoints[14].y;
   }
-  // console.log('y1= ', y_nose1);
-  setTimeout(getPoses, 1000);
+  setTimeout(getPoses, 100);
 }
 
 async function getPoses1(){ 
@@ -67,11 +96,14 @@ function draw() {
       const {x, y, score } = kp;
       if (score > 0.5){
         //console.log(poses[0].keypoints);
-        //y_nose2 = poses[0].keypoints[0].y;
-        // fill(255);
-        // stroke(0);
-        // strokeWeight(4);
-        // circle(x, y, 12);
+        fill(255);
+        stroke(0);
+        strokeWeight(4);
+        circle(x, y, 12);
+        //test angle
+        fill(0,255,0);
+        textSize(32);
+        text(angle, 50, 100);
         if(Fall == 1) {
           //console.log(y_nose1);
           fill(0,255,0);
