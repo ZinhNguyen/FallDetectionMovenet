@@ -34,17 +34,21 @@ async function videoReady(){
 
 async function setup() {
   createCanvas(640, 480); 
+  //await init();
   // video = createCapture(VIDEO, videoReady);
-  video = createVideo(['E:/Entertainment/xam/20160723_095852.mp4']);
+  video = createVideo('fall1.mp4', videoReady);
+  video.loop();
+  //video = loadImage('image.jpg');
   //video = createCapture(VIDEO);
   //video.size(320, 240);
   video.hide();
   await init();
-  //createButton('pose').mousePressed(getPoses1);
+  createButton('pose').mousePressed(getPoses);
 }
 
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
+  //console.log(1);
   // console.log(poses[0].keypoints[0].y);
   if (poses && poses.length > 0){
     // First condition
@@ -95,8 +99,10 @@ async function getPoses1(){
 
 function draw() {
   background(220);
-  image(video, 0, 0, 640, 480);
-  //print(y_nose1);
+  image(video, 0, 0);
+  //filter(THRESHOLD);
+  //print(video.elt);
+  //console.log(poses);
   if (poses && poses.length > 0) {
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
