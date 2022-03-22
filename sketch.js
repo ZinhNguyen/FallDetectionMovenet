@@ -16,6 +16,7 @@ let angle1 = 0;
 let angle2 = 0;
 let a = 1;
 let Fall = 0;
+let ready = 0;
 
 async function init(){
     const detectorConfig = {
@@ -32,23 +33,29 @@ async function videoReady(){
   await getPoses();
 }
 
+
 async function setup() {
   createCanvas(640, 480); 
-  //await init();
   // video = createCapture(VIDEO, videoReady);
-  video = createVideo('fall1.mp4', videoReady);
-  video.loop();
+  video = createVideo('fall3.mp4');
+  //video.play();
+  //video.loop();
   //video = loadImage('image.jpg');
   //video = createCapture(VIDEO);
   //video.size(320, 240);
   video.hide();
   await init();
-  createButton('pose').mousePressed(getPoses);
+  await getPoses();
+  //createButton('pose').mousePressed(getPoses);
+  if (ready == 1) {
+    video.play();
+  }
 }
+
 
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
-  //console.log(1);
+  ready = 1;
   // console.log(poses[0].keypoints[0].y);
   if (poses && poses.length > 0){
     // First condition
@@ -59,7 +66,7 @@ async function getPoses(){
         Fall = 1;
       }
     }
-    else Fall = 0;
+    //else Fall = 0;
     // // Second condition
     // if(angle1 > 45 || angle2 > 45){
     //   a+=1;
@@ -87,15 +94,15 @@ async function getPoses(){
     x_knee2 = poses[0].keypoints[14].x;
     y_knee2 = poses[0].keypoints[14].y;
   }
-  setTimeout(getPoses, 100);
+  setTimeout(getPoses, 50);
 }
 
-async function getPoses1(){ 
-  poses1 = await detector.estimatePoses(video.elt);
-  y_nose2 = poses1[0].keypoints[0].y
-  console.log(y_nose2);
-  setTimeout(getPoses, 2000);
-}
+// async function getPoses1(){ 
+//   poses1 = await detector.estimatePoses(video.elt);
+//   y_nose2 = poses1[0].keypoints[0].y
+//   console.log(y_nose2);
+//   setTimeout(getPoses, 2000);
+// }
 
 function draw() {
   background(220);
@@ -106,7 +113,7 @@ function draw() {
   if (poses && poses.length > 0) {
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
-      if (score > 0.5){
+      if (score > 0.3){
         //console.log(poses[0].keypoints);
         fill(255);
         stroke(0);
@@ -114,16 +121,21 @@ function draw() {
         circle(x, y, 12);
         //test angle
         fill(0,255,0);
-        textSize(32);
+        textSize(20);
         text(angle1, 50, 100);
         text(angle2, 50, 150);
-        if(Fall == 1) {
-          //console.log(y_nose1);
-          fill(0,255,0);
-          textSize(32);
-          text('Fall Detection', 50, 50);
-        }
       }
     }
+  }
+  if(Fall == 1) {
+    //console.log(y_nose1);
+    fill(255,0,0);
+    textSize(32);
+    text('Fall Detection', 50, 50);
+  }
+  else {
+    fill(0,255,0);
+    textSize(32);
+    text('No Fall', 50, 50);
   }
 }
