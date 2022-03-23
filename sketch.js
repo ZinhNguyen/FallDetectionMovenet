@@ -17,6 +17,12 @@ let angle2 = 0;
 let a = 1;
 let Fall = 0;
 let ready = 0;
+let vid = 1;
+let CountFall = 0;
+let Count = true;
+// var fs = require('fs');
+// var files = fs.readdirSync('./');
+// print(files);
 
 async function init(){
     const detectorConfig = {
@@ -35,14 +41,16 @@ async function videoReady(){
 
 
 async function setup() {
+  //createCanvas(640, 480); 
   createCanvas(640, 480); 
   // video = createCapture(VIDEO, videoReady);
-  video = createVideo('fall3.mp4');
+  video = createVideo('video/fall'+ vid +'.mp4');
+  //console.log(vid);
   //video.play();
   //video.loop();
   //video = loadImage('image.jpg');
   //video = createCapture(VIDEO);
-  //video.size(320, 240);
+  //video.size(1280, 480);
   video.hide();
   await init();
   await getPoses();
@@ -62,7 +70,7 @@ async function getPoses(){
     if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
       if(angle1 > 45 || angle2 > 45){
         a+=1;
-        print(a);
+        //print(a);
         Fall = 1;
       }
     }
@@ -131,11 +139,28 @@ function draw() {
     //console.log(y_nose1);
     fill(255,0,0);
     textSize(32);
-    text('Fall Detection', 50, 50);
+    text('Fall Detection', 350, 50);
   }
   else {
     fill(0,255,0);
     textSize(32);
-    text('No Fall', 50, 50);
+    text('No Fall', 350, 50);
   }
+  if (video.time()==video.duration()){
+    //console.log('finished video');
+    if (Fall == 1 && Count == true){
+      CountFall++;
+      Count = false;
+    }
+    ready = 0;
+    Fall = 0;
+    if (vid < 5){
+      vid++;
+      Count = true;
+      setup();
+    }
+  }
+  fill(255,0,0);
+  textSize(32);
+  text('Fall: ' + CountFall, 50, 50);
 }
