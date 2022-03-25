@@ -17,9 +17,10 @@ let angle2 = 0;
 let a = 1;
 let Fall = 0;
 let ready = 0;
-let vid = 1;
+let vid = 30;
 let CountFall = 0;
 let Count = true;
+let timer= 50;
 // var fs = require('fs');
 // var files = fs.readdirSync('./');
 // print(files);
@@ -43,8 +44,9 @@ async function videoReady(){
 async function setup() {
   //createCanvas(640, 480); 
   createCanvas(640, 480); 
-  // video = createCapture(VIDEO, videoReady);
-  video = createVideo('video/fall'+ vid +'.mp4');
+  //video = createCapture(VIDEO, videoReady);
+  //video = createVideo('video/fall-'+ vid +'-cam0.mp4');
+  video = createVideo('video/adl-'+ vid +'-cam0.mp4');
   //console.log(vid);
   //video.play();
   //video.loop();
@@ -60,7 +62,6 @@ async function setup() {
   }
 }
 
-
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
   ready = 1;
@@ -69,11 +70,16 @@ async function getPoses(){
     // First condition
     if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
       if(angle1 > 45 || angle2 > 45){
-        a+=1;
-        //print(a);
-        Fall = 1;
+        // if(height/weight1 < 1 || height/weight2 < 1){
+          a+=1;
+          print(a);
+          Fall = 1;
+        // }
       }
     }
+    // if(poses[0].keypoints[0].y < y_knee1 && poses[0].keypoints[0].y < y_knee2 && angle1 < 45 && angle2 < 45){
+    //   Fall = 0;
+    // }
     //else Fall = 0;
     // // Second condition
     // if(angle1 > 45 || angle2 > 45){
@@ -101,8 +107,16 @@ async function getPoses(){
     y_knee1 = poses[0].keypoints[13].y;
     x_knee2 = poses[0].keypoints[14].x;
     y_knee2 = poses[0].keypoints[14].y;
+  } else {
+    // if (a > 2){
+    //   Fall = 1;
+    // }
+    // else {
+      Fall = 0;
+    // }
   }
-  setTimeout(getPoses, 50);
+
+  setTimeout(getPoses, timer);
 }
 
 // async function getPoses1(){ 
@@ -151,10 +165,14 @@ function draw() {
     if (Fall == 1 && Count == true){
       CountFall++;
       Count = false;
+      console.log('File ', vid, ': Fall');
+    } else {
+      console.log('File ', vid, ': No Fall');
     }
     ready = 0;
     Fall = 0;
-    if (vid < 5){
+    if (vid < 40){
+      a = 0;
       vid++;
       Count = true;
       setup();
