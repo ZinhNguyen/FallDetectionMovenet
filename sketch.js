@@ -8,6 +8,10 @@ let x_knee1;
 let y_knee1;
 let x_knee2;
 let y_knee2;
+let x_ankle1;
+let y_ankle1;
+let x_ankle2;
+let y_ankle2;
 let height = 0;
 let weight = 0;
 let weight1 = 0;
@@ -17,24 +21,28 @@ let angle2 = 0;
 let a = 1;
 let Fall = 0;
 let ready = 0;
-let vid = 30;
+let vid = 1;
+let limit_video = 40;
 let CountFall = 0;
 let Count = true;
-let timer= 50;
-// var fs = require('fs');
-// var files = fs.readdirSync('./');
-// print(files);
+let timer= 0;
+let flag_stand = 0;
 
+// Initialize for MoveNet model
 async function init(){
     const detectorConfig = {
       modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
     };
     detector = await poseDetection.createDetector(
       poseDetection.SupportedModels.MoveNet, 
-      detectorConfig
+      detectorConfig,
     );
+    flag_stand = 0;
+    Fall = 0;
+    ready = 0;
 }
 
+// Load video before getposes
 async function videoReady(){
   console.log('video ready');
   await getPoses();
@@ -45,41 +53,53 @@ async function setup() {
   //createCanvas(640, 480); 
   createCanvas(640, 480); 
   //video = createCapture(VIDEO, videoReady);
-  //video = createVideo('video/fall-'+ vid +'-cam0.mp4');
+  // video = createVideo('video/fall-'+ vid +'-cam0.mp4');
   video = createVideo('video/adl-'+ vid +'-cam0.mp4');
   //console.log(vid);
   //video.play();
   //video.loop();
-  //video = loadImage('image.jpg');
-  //video = createCapture(VIDEO);
   //video.size(1280, 480);
   video.hide();
   await init();
   await getPoses();
   //createButton('pose').mousePressed(getPoses);
+  // createButton('Pause').mousePressed(pause);
+  // createButton('Play').mousePressed(play);
   if (ready == 1) {
     video.play();
   }
 }
 
+function pause(){
+  video.pause();
+}
+function play(){
+  video.play();
+}
+
+
 async function getPoses(){ 
+  ready = 0;
   poses = await detector.estimatePoses(video.elt);
+  //console.log(poses[0].keypoints[0].y);
   ready = 1;
-  // console.log(poses[0].keypoints[0].y);
   if (poses && poses.length > 0){
     // First condition
-    if(poses[0].keypoints[0].y > y_knee1 || poses[0].keypoints[0].y > y_knee2){
-      if(angle1 > 45 || angle2 > 45){
-        // if(height/weight1 < 1 || height/weight2 < 1){
+    if(poses[0].keypoints[0].y >= y_knee1 || poses[0].keypoints[0].y >= y_knee2){
+      if(angle1 >= 45 || angle2 >= 45){
+        if(height_body/weight_body < 1){
           a+=1;
           print(a);
           Fall = 1;
-        // }
+          if (poses[0].keypoints[0].y > flag_stand){
+            flag_stand = poses[0].keypoints[0].y;
+          }
+        } 
       }
     }
-    // if(poses[0].keypoints[0].y < y_knee1 && poses[0].keypoints[0].y < y_knee2 && angle1 < 45 && angle2 < 45){
-    //   Fall = 0;
-    // }
+    if(poses[0].keypoints[0].y < flag_stand && weight_body < height_body && angle1 < 45 && angle2 < 45){
+      Fall = 0;
+    }
     //else Fall = 0;
     // // Second condition
     // if(angle1 > 45 || angle2 > 45){
@@ -88,15 +108,17 @@ async function getPoses(){
     //   Fall = 1;
     // }
     // else Fall = 0;
-    height = Math.sqrt((Math.pow(x_knee1 - x_nose,2) + Math.pow(y_knee1 - y_nose,2)));
+    hypotenuse = Math.sqrt((Math.pow(x_ankle1 - x_nose,2) + Math.pow(y_ankle1 - y_nose,2)));
+    height_body = Math.abs(y_nose - y_ankle1);
+    weight_body = Math.abs(x_nose - x_ankle1);
     // let a = Math.pow(x_knee1 - x_nose,2);
     // let b = Math.pow(y_knee1 - y_nose,2);
     // height = Math.sqrt(a + b);
-    weight1 = Math.abs(x_nose - x_knee1);
-    weight2 = Math.abs(x_nose - x_knee2);
+    side_opposite_angle_1 = Math.abs(x_nose - x_ankle1);
+    side_opposite_angle_2 = Math.abs(x_nose - x_ankle2);
     // angle = weight1/height;
-    angle1 = Math.asin(weight1/height);
-    angle2 = Math.asin(weight2/height);
+    angle1 = Math.asin(side_opposite_angle_1/hypotenuse);
+    angle2 = Math.asin(side_opposite_angle_2/hypotenuse);
     // angle = 3*PI/2;
     angle1 = angle1 * 180 / PI;
     angle2 = angle2 * 180 / PI;
@@ -107,24 +129,14 @@ async function getPoses(){
     y_knee1 = poses[0].keypoints[13].y;
     x_knee2 = poses[0].keypoints[14].x;
     y_knee2 = poses[0].keypoints[14].y;
-  } else {
-    // if (a > 2){
-    //   Fall = 1;
-    // }
-    // else {
-      Fall = 0;
-    // }
+    x_ankle1 = poses[0].keypoints[15].x;
+    y_ankle1 = poses[0].keypoints[15].y;
+    x_ankle2 = poses[0].keypoints[16].x;
+    y_ankle2 = poses[0].keypoints[16].y;
   }
 
   setTimeout(getPoses, timer);
 }
-
-// async function getPoses1(){ 
-//   poses1 = await detector.estimatePoses(video.elt);
-//   y_nose2 = poses1[0].keypoints[0].y
-//   console.log(y_nose2);
-//   setTimeout(getPoses, 2000);
-// }
 
 function draw() {
   background(220);
@@ -144,8 +156,8 @@ function draw() {
         //test angle
         fill(0,255,0);
         textSize(20);
-        text(angle1, 50, 100);
-        text(angle2, 50, 150);
+        text(flag_stand, 50, 100);
+        text(poses[0].keypoints[0].y, 50, 150);
       }
     }
   }
@@ -166,12 +178,12 @@ function draw() {
       CountFall++;
       Count = false;
       console.log('File ', vid, ': Fall');
+      Fall = 0;
     } else {
       console.log('File ', vid, ': No Fall');
+      Fall = 0;
     }
-    ready = 0;
-    Fall = 0;
-    if (vid < 40){
+    if (vid < limit_video){
       a = 0;
       vid++;
       Count = true;
