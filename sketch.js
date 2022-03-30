@@ -21,17 +21,27 @@ let angle2 = 0;
 let a = 1;
 let Fall = 0;
 let ready = 0;
-let vid = 1;
-let limit_video = 40;
 let CountFall = 0;
 let Count = true;
 let timer= 0;
 let flag_stand = 0;
+let vid = 1;
+let limit_video = 40;
+//Fall dataset
+// var fall_dataset = 'video/fall-';
+var fall_dataset = 'video/adl-';
+var fall_default = '-cam0.mp4';
+//var dataset = 'video/fall-'+ vid +'-cam0.mp4';
+//NoFall dataset
+//var dataset = 'video/adl-'+ vid +'-cam0.mp4';
+
 
 // Initialize for MoveNet model
 async function init(){
     const detectorConfig = {
       modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+      // enableTracking: true,
+      // trackerType: poseDetection.TrackerType.BoundingBox,
     };
     detector = await poseDetection.createDetector(
       poseDetection.SupportedModels.MoveNet, 
@@ -48,13 +58,12 @@ async function videoReady(){
   await getPoses();
 }
 
-
 async function setup() {
   //createCanvas(640, 480); 
   createCanvas(640, 480); 
-  //video = createCapture(VIDEO, videoReady);
-  // video = createVideo('video/fall-'+ vid +'-cam0.mp4');
-  video = createVideo('video/adl-'+ vid +'-cam0.mp4');
+  // video = createCapture(VIDEO, videoReady);
+  //video = createVideo('video/fall-'+ vid +'-cam0.mp4');
+  video = createVideo(fall_dataset + vid + fall_default);
   //console.log(vid);
   //video.play();
   //video.loop();
@@ -65,9 +74,9 @@ async function setup() {
   //createButton('pose').mousePressed(getPoses);
   // createButton('Pause').mousePressed(pause);
   // createButton('Play').mousePressed(play);
-  if (ready == 1) {
-    video.play();
-  }
+  //if (ready == 1) {
+  video.play();
+  //}
 }
 
 function pause(){
@@ -79,17 +88,20 @@ function play(){
 
 
 async function getPoses(){ 
-  ready = 0;
-  poses = await detector.estimatePoses(video.elt);
+  //ready = 1;
+  if (ready == 1){
+    poses = await detector.estimatePoses(video.elt);
+  }
   //console.log(poses[0].keypoints[0].y);
-  ready = 1;
+  // ready = 1;
   if (poses && poses.length > 0){
+    // console.log(poses);
     // First condition
     if(poses[0].keypoints[0].y >= y_knee1 || poses[0].keypoints[0].y >= y_knee2){
       if(angle1 >= 45 || angle2 >= 45){
         if(height_body/weight_body < 1){
           a+=1;
-          print(a);
+          //print(a);
           Fall = 1;
           if (poses[0].keypoints[0].y > flag_stand){
             flag_stand = poses[0].keypoints[0].y;
@@ -134,14 +146,14 @@ async function getPoses(){
     x_ankle2 = poses[0].keypoints[16].x;
     y_ankle2 = poses[0].keypoints[16].y;
   }
-
+  
   setTimeout(getPoses, timer);
 }
 
 function draw() {
   background(220);
   image(video, 0, 0);
-  //filter(THRESHOLD);
+  // filter(THRESHOLD);
   //print(video.elt);
   //console.log(poses);
   if (poses && poses.length > 0) {
@@ -177,11 +189,9 @@ function draw() {
     if (Fall == 1 && Count == true){
       CountFall++;
       Count = false;
-      console.log('File ', vid, ': Fall');
-      Fall = 0;
+      console.log('Video ', vid, ': Fall');
     } else {
-      console.log('File ', vid, ': No Fall');
-      Fall = 0;
+      console.log('Video ', vid, ': No Fall');
     }
     if (vid < limit_video){
       a = 0;
@@ -189,6 +199,11 @@ function draw() {
       Count = true;
       setup();
     }
+  }
+  if (video.loadedmetadata == true){
+    ready = 1;
+  } else {
+    ready = 0;
   }
   fill(255,0,0);
   textSize(32);
