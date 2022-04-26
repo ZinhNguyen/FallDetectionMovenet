@@ -1,45 +1,25 @@
-let detector;
-let poses;
-let video;
-let x_nose;
-let y_nose;
-// let y_nose2;
-let x_knee1;
-let y_knee1;
-let x_knee2;
-let y_knee2;
-let x_ankle1;
-let y_ankle1;
-let x_ankle2;
-let y_ankle2;
-let height = 0;
-let weight = 0;
-let weight1 = 0;
-let weight2 = 0;
+let detector, poses, video;
+let x_nose, y_nose, x_knee1, y_knee1, x_knee2, y_knee2, x_ankle1, y_ankle1, x_ankle2, y_ankle2, x_kneeTB, y_kneeTB, x_ankleTB, y_ankleTB;
+let height = 0, weight = 0, angle = 0, Fall = 0, ready = 0, CountFall = 0, timer= 0, flag_stand = 0, vid = 0;
 let angle1 = 0;
 let angle2 = 0;
-let a = 1;
-let Fall = 0;
-let ready = 0;
-let CountFall = 0;
 let Count = true;
-let timer= 0;
-let flag_stand = 0;
-let vid = 1;
-let limit_video = 30;
-//Fall dataset
-var fall_dataset = 'video/fall-';
-// var fall_dataset = 'video/adl-';
-var fall_default = '-cam0.mp4';
-// var dataset = 'video1/fall-13-cam1.mp4';
-//NoFall dataset
-//var dataset = 'video/adl-'+ vid +'-cam0.mp4';
+let a = 1;
+let total = vid;
+let limit_video = 70;
+let weight_body = 1;
+let height_body = 2;
 const ScoreThreshold = 0.4;
+let resultCount = 0;
+let rate;
+// Result to evaluate dataset
+const eval = ['1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1','1'
+,'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0']
 
 // Initialize for MoveNet model
-      //SINGLEPOSE_LIGHTNING , SINGLEPOSE_THUNDER, MULTIPOSE_LIGHTNING
 async function init(){
     const detectorConfig = {
+      //SINGLEPOSE_LIGHTNING , SINGLEPOSE_THUNDER, MULTIPOSE_LIGHTNING
       modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
       // enableTracking: true,
       // trackerType: poseDetection.TrackerType.BoundingBox,
@@ -59,105 +39,85 @@ async function videoReady(){
   await getPoses();
 }
 
+// init for setup model
 async function setup() {
-  //createCanvas(640, 480); 
-  createCanvas(640, 480); 
+  createCanvas(640, 480);
+  // Change to capture via camera 
   // video = createCapture(VIDEO, videoReady);
-  // video = createVideo(fall_dataset + vid + fall_default);
-  video = createVideo('video1/' + 33 + '.mp4');
-  // video = createVideo(dataset);
-  //console.log(vid);
+  video = createVideo('dataset/' + vid + '.mp4');
   //video.play();
   //video.loop();
+  // set size for video
   // video.size(640, 480);
   video.hide();
   await init();
   await getPoses();
-  // createButton('pose').mousePressed(getPoses1);
-  // createButton('Pause').mousePressed(pauseAndGetPose1);
-  // createButton('Play').mousePressed(play);
-  //if (ready == 1) {
-  video.play();
-  //}
-}
-
-function pauseAndGetPose1(){
-  video.pause();
-  getPoses1();
-}
-function play(){
   video.play();
 }
 
-async function getPoses1(){
-  poses = await detector.estimatePoses(video.elt);
-  print(poses);
-}
-
-
+// Function to capture poses
 async function getPoses(){ 
-  //ready = 1;
-  // if (ready == 1){
-    poses = await detector.estimatePoses(video.elt);
-  // }
-  //console.log(poses[0].keypoints[0].y);
-  // ready = 1;
+  poses = await detector.estimatePoses(video.elt);
   if (poses && poses.length > 0){
-    // console.log(poses[0]);
+    // Re-check whether Objection Stand up after fall condition
+    if(poses[0].keypoints[0].y < flag_stand && weight_body < height_body && angle < 45){
+      Fall = 0;
+    }
     // First condition
-    if(poses[0].keypoints[0].y >= y_knee1 || poses[0].keypoints[0].y >= y_knee2){
-      if(angle1 >= 45 || angle2 >= 45){
+    if(poses[0].keypoints[0].y >= y_kneeTB){
+      // Second condition
+      if(angle >= 45 ){
+        // third condition
         if(height_body/weight_body < 1){
           a+=1;
-          //print(a);
+          // print(a);
           Fall = 1;
-          if (poses[0].keypoints[0].y > flag_stand){
+          if (poses[0].keypoints[0].y >= flag_stand){
             flag_stand = poses[0].keypoints[0].y;
           }
         } 
       }
     }
-    // Stand up after fall condition
-    // if(poses[0].keypoints[0].y < flag_stand && weight_body < height_body && angle1 < 45 && angle2 < 45){
-    //   Fall = 0;
-    // }
-    //else Fall = 0;
-    // // Second condition
-    // if(angle1 > 45 || angle2 > 45){
-    //   a+=1;
-    //   print(a);
-    //   Fall = 1;
-    // }
-    // else Fall = 0;
-    hypotenuse = Math.sqrt((Math.pow(x_ankle1 - x_nose,2) + Math.pow(y_ankle1 - y_nose,2)));
-    height_body = Math.abs(y_nose - y_ankle1);
-    weight_body = Math.abs(x_nose - x_ankle1);
-    // let a = Math.pow(x_knee1 - x_nose,2);
-    // let b = Math.pow(y_knee1 - y_nose,2);
-    // height = Math.sqrt(a + b);
-    side_opposite_angle_1 = Math.abs(x_nose - x_ankle1);
-    side_opposite_angle_2 = Math.abs(x_nose - x_ankle2);
-    // angle = weight1/height;
-    angle1 = Math.asin(side_opposite_angle_1/hypotenuse);
-    angle2 = Math.asin(side_opposite_angle_2/hypotenuse);
-    // angle = 3*PI/2;
-    angle1 = angle1 * 180 / PI;
-    angle2 = angle2 * 180 / PI;
-    //console.log(height);
+
+    // Check Angle of objection
+    oppsiteSide = Math.abs(x_kneeTB - x_nose);
+    adjacentSide = Math.abs(y_kneeTB - y_nose);
+    angle = (Math.atan(oppsiteSide/adjacentSide))*180/ PI;
+
+    // Check height and weight of objection
+    height_body = Math.abs(y_nose - y_ankleTB);
+    weight_body = Math.abs(x_nose - x_ankleTB);
+
+    // Other way to check Angle
+    // hypotenuse = Math.sqrt((Math.pow(x_ankle1 - x_nose,2) + Math.pow(y_ankle1 - y_nose,2)));
+    // side_opposite_angle_1 = Math.abs(x_nose - x_ankle1);
+    // side_opposite_angle_2 = Math.abs(x_nose - x_ankle2);
+    // angle1 = Math.asin(side_opposite_angle_1/hypotenuse);
+    // angle2 = Math.asin(side_opposite_angle_2/hypotenuse);
+    // angle1 = angle1 * 180 / PI;
+    // angle2 = angle2 * 180 / PI;
+    // set coordinate for nose
     x_nose = poses[0].keypoints[0].x;
     y_nose = poses[0].keypoints[0].y;
+    // set coordinate for knee
     x_knee1 = poses[0].keypoints[13].x;
     y_knee1 = poses[0].keypoints[13].y;
     x_knee2 = poses[0].keypoints[14].x;
-    y_knee2 = poses[0].keypoints[14].y;
+    y_knee2 = poses[0].keypoints[14].y;   
+    x_kneeTB = (x_knee1 + x_knee2)/2;
+    y_kneeTB = (y_knee1 + y_knee2)/2;
+    // set coordinate for ankle
     x_ankle1 = poses[0].keypoints[15].x;
     y_ankle1 = poses[0].keypoints[15].y;
     x_ankle2 = poses[0].keypoints[16].x;
     y_ankle2 = poses[0].keypoints[16].y;
+    x_ankleTB = (x_ankle1 + x_ankle2)/2;
+    y_ankleTB = (y_ankle1 + y_ankle2)/2;
   }
   setTimeout(getPoses, timer);
 }
 
+// Function to get new video
 function increaseVideo(){
   if (vid < limit_video){
     a = 0;
@@ -167,6 +127,7 @@ function increaseVideo(){
   }
 }
 
+// Draw skeleton for objection
 const skeleton = [
 	[0, 1],
 	[0, 2],
@@ -187,6 +148,7 @@ const skeleton = [
 	[14, 16],
 ];
 
+// Function to get Keypoint of object
 function getKeypointForEdgeVertex(keypoints, vertex) {
 	if (typeof vertex === "number") {
 		const {
@@ -199,43 +161,41 @@ function getKeypointForEdgeVertex(keypoints, vertex) {
 		}
 	} else if (vertex instanceof Array) {
 		const points = vertex.map(v => keypoints[v]);
-		if (points.every(kp => kp.score > ScoreThreshold)) {
-			const { x, y } =
-						// Average the points
-						points.reduce(
-							(acc, v) => ({
-								x: (acc.x * acc.w + v.x) / (acc.w + 1),
-								y: (acc.y * acc.w + v.y) / (acc.w + 1),
-								w: acc.w + 1
-							}),
-							{ x: 0, y: 0, w: 0 }
-						);
+		if (points.every(kp => kp.score > ScoreThreshold)) {             
+			const { x, y } = 
+        // Average the points
+        points.reduce(
+          (acc, v) => ({
+            x: (acc.x * acc.w + v.x) / (acc.w + 1),
+            y: (acc.y * acc.w + v.y) / (acc.w + 1),
+            w: acc.w + 1
+          }),
+          { x: 0, y: 0, w: 0 }
+        );
 		  return { x, y };
 		}
 	}
 }
 
+// Function to draw skeleton and the result of test
 function draw() {
   background(220);
   image(video, 0, 0);
-  // filter(THRESHOLD);
-  //print(video.elt);
   if (poses && poses.length > 0) {
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
       if (score > 0.3){
-        //console.log(poses[0].keypoints);
         fill(255);
         stroke(0);
         strokeWeight(2);
         circle(x, y, 6);
-        //test angle
         fill(0,255,0);
         textSize(20);
-        text(flag_stand, 50, 100);
-        text(poses[0].keypoints[0].y, 50, 150);
+        text(angle, 50, 100);
+        text(flag_stand, 50, 150);
       }
     }
+    // Set color for skeleton
     stroke('yellow');
     strokeWeight(2);
     for (let edge of skeleton) {
@@ -248,7 +208,6 @@ function draw() {
   }
   stroke(0);
   if(Fall == 1) {
-    //console.log(y_nose1);
     fill(255,0,0);
     textSize(32);
     text('Fall Detection', 350, 50);
@@ -256,25 +215,43 @@ function draw() {
   else {
     fill(0,255,0);
     textSize(32);
-    text('No Fall', 350, 50);
+    text('No Fall', 380, 50);
   }
+  // Condition to calculate result and change to new video 
   if (video.time()==video.duration()){
-    //console.log('finished video');
+    flag_stand = 0;
     if (Fall == 1 && Count == true){
+      if (Fall == eval[vid]) {
+        resultCount++;
+      }
       CountFall++;
       Count = false;
       console.log('Video ', vid, ': Fall');
     } else {
+      if (Fall == eval[vid]) {
+        resultCount++;
+      }
       console.log('Video ', vid, ': No Fall');
     }
     increaseVideo();
   }
+
+  // waiting load metadata before playing
   if (video.loadedmetadata == true){
     ready = 1;
   } else {
     ready = 0;
   }
+
+  // Draw Fall quantity on the screen
   fill(255,0,0);
   textSize(32);
-  text('Fall: ' + CountFall, 50, 50);
+  text('Fall: ' + CountFall + '/' + vid, 50, 50);
+  fill(0,0,255);
+  textSize(32);
+
+  // Draw actual rate on the screen
+  rate = (resultCount/vid)*100;
+  rate = rate.toFixed(2)
+  text('Rate: ' + rate + '%', 50, 200);
 }
