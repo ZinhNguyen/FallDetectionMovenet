@@ -55,9 +55,23 @@ async function setup() {
   video.play();
 }
 
+// Use this function to extract Json file
+function exportToJsonFile(jsonData) {
+    let dataStr = JSON.stringify(jsonData);
+    let dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    let exportFileDefaultName = 'data '+ vid+'.json';
+    let linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    //linkElement.click();
+
+}
+
+
 // Function to capture poses
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
+  // exportToJsonFile(poses);
   if (poses && poses.length > 0){
     // Re-check whether Objection Stand up after fall condition
     if(poses[0].keypoints[0].y < flag_stand && weight_body < height_body && angle < 45){
