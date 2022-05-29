@@ -35,7 +35,7 @@ async function getPoses(){
 
 function draw() {
   background(220);
-  image(video, 0, 0, 640, 480);
+  image(video, 50, 0, 640, 480);
   if (poses && poses.length > 0) {
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
