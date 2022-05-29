@@ -1,11 +1,12 @@
 let detector, poses, video;
 let x_nose, y_nose, x_knee1, y_knee1, x_knee2, y_knee2, x_ankle1, y_ankle1, x_ankle2, y_ankle2, x_kneeTB, y_kneeTB, x_ankleTB, y_ankleTB;
-let height = 0, weight = 0, angle = 0, Fall = 0, ready = 0, CountFall = 0, timer= 0, flag_stand = 0, vid = 0;
+let height = 0, weight = 0, angle = 0, Fall = 0, ready = 0, CountFall = 0, timer= 0, flag_stand = 0;
 let angle1 = 0;
 let angle2 = 0;
 let Count = true;
 let a = 1;
-let total = vid;
+let total = 0;
+let vid = 0
 let limit_video = 70;
 let weight_body = 1;
 let height_body = 2;
@@ -194,7 +195,7 @@ function getKeypointForEdgeVertex(keypoints, vertex) {
 // Function to draw skeleton and the result of test
 function draw() {
   background(220);
-  image(video, 50, 0, 640, 480);
+  image(video, 0, 0);
   if (poses && poses.length > 0) {
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
