@@ -3,14 +3,12 @@ let time = 0;
 let loaded = false;
 let vid = 0;
 let video_flag = false;
-let numFrames = 300;
-let capture;
 
 function setup() {
-  createCanvas(400, 400);
+  cnv = createCanvas(640,480);
   noLoop();
-  let button = createButton("reset sketch");
-  button.mousePressed(resetSketch);
+  // let button = createButton("reset sketch");
+  // button.mousePressed(resetSketch);
   video = createVideo('dataset6/all/'+ vid +'.mp4', () => {
     resizeCanvas(video.width, video.height);
     loaded = true;
@@ -25,12 +23,13 @@ function setup() {
         video.elt.removeEventListener('seeked', onSeek);
         // Wait a half second and draw the next frame
         if(video.time() != video.duration()){
-          setTimeout(drawNextFrame, 500);
+          // save(cnv, 'video' + vid + ' (' + round(time*25) +').jpg')
+          setTimeout(drawNextFrame, 50);
         } else {
+          save(cnv, 'video' + vid + ' (' + round(time*25) +').jpg')
           console.log("finish...");
           // time = 0;
-          video_flag = true;
-          
+          video.stop();
         }
       };
       video.elt.addEventListener('seeked', onSeek);
@@ -43,28 +42,19 @@ function setup() {
     };
     drawNextFrame();
   });
-  video.play();
 }
 
 function draw() {
   if (!loaded) return;
   image(video, 0, 0);
-  fill('#F00');
+  fill(255);
   noStroke();
   textAlign(LEFT, TOP);
-  textSize(20);
-  text(round(time*25), 20, 20);
-  text("video = " +  vid, 20, 40);
-  text("video_flag = " +  video_flag, 20, 60);
-  if (video_flag==true){
-    time = 0;
-    // vid+=1;
-    setup();
-    video_flag = false;
-  }
+  textSize(10);
+  text('Frame ' + round(time*25), 20, 10);
+  text("video = " +  vid, 20, 20);
 }
-function resetSketch() {
-  saveFrames('out', 'png', 1, 25, data => {
-    print(data);
-  });
-  }
+// function resetSketch() {
+//   vid+=1;
+//   time=0;
+// }
