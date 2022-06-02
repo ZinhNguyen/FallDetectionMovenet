@@ -1,8 +1,9 @@
 let video;
 let time = 0;
 let loaded = false;
-let vid = 0;
+let vid = 186;
 let video_flag = false;
+let frame = 1;
 
 function setup() {
   cnv = createCanvas(640,480);
@@ -23,10 +24,13 @@ function setup() {
         video.elt.removeEventListener('seeked', onSeek);
         // Wait a half second and draw the next frame
         if(video.time() != video.duration()){
-          // save(cnv, 'video' + vid + ' (' + round(time*25) +').jpg')
-          setTimeout(drawNextFrame, 50);
+          save(cnv, 'video' + vid + ' (' + frame +').jpg');
+          frame+=1;
+          // console.log(round(time*25));
+          setTimeout(drawNextFrame, 70);
         } else {
-          save(cnv, 'video' + vid + ' (' + round(time*25) +').jpg')
+          save(cnv, 'video' + vid + ' (' + frame +').jpg');
+          frame+=1;
           console.log("finish...");
           // time = 0;
           video.stop();
@@ -47,11 +51,12 @@ function setup() {
 function draw() {
   if (!loaded) return;
   image(video, 0, 0);
-  fill(255);
+  fill(0);
   noStroke();
   textAlign(LEFT, TOP);
   textSize(10);
-  text('Frame ' + round(time*25), 20, 10);
+  // text('Frame ' + round(time*25), 20, 10);
+  text('Frame ' + frame, 20, 10);
   text("video = " +  vid, 20, 20);
 }
 // function resetSketch() {
