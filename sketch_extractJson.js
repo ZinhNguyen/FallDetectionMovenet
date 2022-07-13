@@ -1,14 +1,22 @@
 let detector, poses, video;
-let vid = 0;
 let img;
-let img_pos = 158;
-let limit_video = 10;
 const ScoreThreshold = 0.4;
 let resultCount = 0;
 let timer = 0;
 let reset_flag = false;
 let isExistsFile = true;
 let loaded = false;
+
+//Set position of frame. Default is 1
+let img_pos = 1;
+//Set VideoName need to extract
+let vid = 220;
+//Set final video need to extract
+let limit_video = 220;
+//Set folder that stored frame! 
+const folder = 'TestFrame/video';
+
+//Set Model SINGLEPOSE_LIGHTNING , SINGLEPOSE_THUNDER, MULTIPOSE_LIGHTNING
 
 // Initialize for MoveNet model
 async function init(){
@@ -24,29 +32,17 @@ async function init(){
     );
 }
 
-// Load video before getposes
-async function videoReady(){
-    console.log('video ready');
-    await getPoses();
-}
-
 // init for setup model
 async function setup() {
     createCanvas(960, 720);
-    // Change to capture via camera 
-    //   video = createCapture(VIDEO, videoReady);
-    // let button = createButton("reset sketch");
-    // button.mousePressed(resetSketch);
-    img = loadImage('imageDataset6/video'+ vid +' (' + img_pos +').jpg',
-        () => isExistsFile = true,
+    img = loadImage(folder + vid +' (' + img_pos +').jpg',
+        () => loaded = true,
         () => isExistsFile = false,);
-    // resizeCanvas(img.width, img.height);
-    console.log('ready')
-    //   video.hide();
-    await init();
-    await getPoses();
+    if (img_pos == 1) {
+        await init();
+        await getPoses();
+    }
     reset_flag = true;
-    loaded = true;
 }
 
 // Use this function to extract Json file
@@ -69,6 +65,7 @@ async function getPoses(){
     poses = await detector.estimatePoses(img.canvas);
     // exportToJsonFile(poses);
     setTimeout(getPoses, timer);
+    reset_flag = true;
 }
 
 
@@ -126,9 +123,6 @@ function getKeypointForEdgeVertex(keypoints, vertex) {
 function draw() {
     // background(220);
     image(img,0,0);
-    // console.log('test');
-    // image(img, 0, height/28, img.width/2, img.height/2);
-    // console.log(poses);
     if (poses && poses.length > 0) {
         for (let kp of poses[0].keypoints){
         const {x, y, score } = kp;
@@ -139,8 +133,6 @@ function draw() {
             circle(x, y, 6);
             fill(0,255,0);
             textSize(20);
-            // text(angle, 50, 100);
-            // text(flag_stand, 50, 150);
         }
         }
         // Set color for skeleton
@@ -160,7 +152,6 @@ function draw() {
 
 function checkVideo(){
     if (loaded == true && reset_flag ==true && isExistsFile == true){
-        // setTimeout(resetSketch(),100)
         resetSketch();
         reset_flag = false;
     }
