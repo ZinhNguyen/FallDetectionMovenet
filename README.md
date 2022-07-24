@@ -5,6 +5,13 @@ This project was created to compare with OpenPose model.
 ## Relative Article: 
  Link: https://www.researchgate.net/publication/341206883_Fall_Detection_Based_on_Key_Points_of_Human-Skeleton_Using_OpenPose
 
+******How to run realtime mode?********
+1. Go to index.html
+2. uncomment for <script src="sketch_realtime.js"></script> and comment for other script
+    <script src="sketch_realtime.js"></script>
+    <!-- <script src="sketch_extractJson.js"></script> -->
+    <!-- <script src="sketch_extractFrameVideo.js"></script> -->
+	
 ******How to extract from Video to Frame?*********
 1. Go to index.html
 2. uncomment for <script src="sketch_extractFrameVideo.js"></script> and comment for other script
