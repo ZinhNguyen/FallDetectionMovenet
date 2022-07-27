@@ -10,16 +10,24 @@
     <!-- Alternatively you can use the WASM backend: <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script> -->
     <script src="https://smtpjs.com/v3/smtp.js"></script>
     <script src="pose-detection"></script>
+    <script src="navigation.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8">
-
   </head>
-  <body>
-    <!-- <script src="sketch.js"></script> -->
-    <script src="sketch_realtime.js"></script>
+  <body style="margin: 30px;">
+    <title>Welcome to Fall Detection system</title>
+    <!-- <script id ="aaa" type="hidden" src="sketch_realtime.js"></script> -->
     <!-- <script src="sketch_extractJson.js"></script> -->
     <!-- <script src="sketch_extractFrameVideo.js"></script> -->
     
-  
-
+    <h1>Fall Detection using Movenet Model</h1>
+    <p>Please select an option for demo:</p>
+    <select id="mySelect" onchange="changeScript()">
+      <option value="home" selected = 'true'>0. Home</option>
+      <option value="extFrame">1. Extract from Video to Frames</option>
+      <option value="extJson">2. Extract from Frames to Json files</option>
+      <option value="realtime">3. Fall Detection Realtime</option>
+    </select>
+    <p id="extFrameInput"></p>
+    <!-- <input type="file" webkitdirectory directory multiple/> -->
 </body></html>

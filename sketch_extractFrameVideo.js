@@ -4,19 +4,40 @@ let loaded = false;
 let video_flag = false;
 let frame = 1;
 //Set Video Name to extract
-let vidName = 220;
+// let videName = document.currentScript.getAttribute('videoName');
 //Set frame for Video before extracting!
-const FPS = 25;
+let FPS;
 //Set folder that stored video! 
-const folder = 'dataset6/all/';
+const folder = 'video/';
 
+// console.log(videName);
+
+function getSearchParameters() {
+  var prmstr = window.location.search.substr(1);
+  return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+}
+
+function transformToAssocArray( prmstr ) {
+  var params = {};
+  var prmarr = prmstr.split("&");
+  for ( var i = 0; i < prmarr.length; i++) {
+      var tmparr = prmarr[i].split("=");
+      params[tmparr[0]] = tmparr[1];
+  }
+  return params;
+}
+
+var params = getSearchParameters();
+videoName = params.files;
+vidName = params.files.slice(0,-4);
+FPS = params.fps;
 
 function setup() {
   cnv = createCanvas(640,480);
   noLoop();
   // let button = createButton("reset sketch");
   // button.mousePressed(resetSketch);
-  video = createVideo(folder + vidName +'.mp4', () => {
+  video = createVideo(folder + videoName, () => {
     resizeCanvas(video.width, video.height);
     loaded = true;
     // video.volume(0);

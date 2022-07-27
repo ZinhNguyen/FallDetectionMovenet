@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="en"><head>
+    <script src="p5.js"></script>
+    <script src="https://unpkg.com/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
+    <!-- Require the peer dependencies of pose-detection. -->
+    <script src="tfjs-core"></script>
+    <script src="tfjs-converter"></script>
+
+    <!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
+    <script src="tfjs-backend-webgl"></script>
+    <!-- Alternatively you can use the WASM backend: <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script> -->
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="pose-detection"></script>
+    <script src="navigation.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+  </head>
+  <body style="margin: 30px;">
+    <title>Welcome to Fall Detection system</title>
+    <!-- <script src="sketch_realtime.js"></script> -->
+    <!-- <script src="sketch_extractJson.js"></script> -->
+    <!-- <script id="kaka" src="sketch_extractFrameVideo.js" videoName="-1"></script> -->
+    
+    <h1>Fall Detection using Movenet Model</h1>
+    <p>Please select an option for demo:</p>
+    <select id="mySelect" onchange="changeScript()">
+      <option value="home">0. Home</option>
+      <option value="extFrame"  selected = 'true' >1. Extract from Video to Frames</option>
+      <option value="extJson">2. Extract from Frames to Json files</option>
+      <option value="realtime">3. Fall Detection Realtime</option>
+    </select>
+    <p id="extFrameInput">Please choose video to extract </p>
+
+    <p id="par"></p>
+
+<form id="myForm" method="GET" action="videotoframechild.html" enctype="multipart/form-data">
+
+    Files: <input required type="file" id="files" name="files" multiple accept="video/*"><br/><br/>
+    FPS: <input type="text" name="fps" placeholder="Please input Video FPS" required/><br/><br/>
+
+    <div id="selectedFiles"></div>
+
+    <input  name="submit" type="submit" value="ExtractFrame"/>
+</form>
+
+<script>
+var selDiv = "";
+    
+document.addEventListener("DOMContentLoaded", init, false);
+
+function init() {
+    document.querySelector('#files').addEventListener('change', handleFileSelect, false);
+    selDiv = document.querySelector("#selectedFiles");
+}
+    
+function handleFileSelect(e) {
+    
+    if(!e.target.files || !window.FileReader) return;
+
+    selDiv.innerHTML = "";
+    
+    var files = e.target.files;
+    var filesArr = Array.prototype.slice.call(files);
+    filesArr.forEach(function(f) {
+        // var f = files[i];
+        if(!f.type.match("video.*")) {
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var html = "<form class='' action='index.html' method='post'>"
+            var html = "<video width='320' height='240' controls>";
+            html = html + "<source src=\"" + e.target.result + "\">"  ;
+            html = html + "</video>";
+            html = html + "<input name='array[]' type='hidden' value='" + f.name+ "' onclick='Geeks();'' /> File Name: " + f.name + "<br clear=\"left\"/>";
+            selDiv.innerHTML += html;				
+        }
+        reader.readAsDataURL(f); 
+    });
+}
+</script>
+
+
+<!-- <script type="text/javascript">
+    var k = "The respective values are :";
+    function Geeks() {
+        var input = document.getElementsByName('array[]');
+        for (var i = 0; i < input.length; i++) {
+            var a = input[i];
+            k = k + "array[" + i + "].value= "
+                               + a.value + " ";
+            console.log(input[i].value);
+        }
+        document.getElementById("par").innerHTML = k;
+    }
+</script> -->
+</body></html>

@@ -1,16 +1,17 @@
 let detector, poses, video;
 let x_nose, y_nose, x_knee1, y_knee1, x_knee2, y_knee2, x_ankle1, y_ankle1, x_ankle2, y_ankle2, x_kneeTB, y_kneeTB, x_ankleTB, y_ankleTB;
-let y_left_hip, y_right_hip, mid_hip, p;
+let y_left_hip, y_right_hip, mid_hip, p, vel;
 let angle = 0, Fall = 0, timer= 250;
 let limit_video = 70;
 let weight_body = 1;
 let height_body = 2;
-let frame1 = 0;
+let frame1;
 let condition_1 = false;
 let condition_2 = false;
 let condition_3 = false;
-let frame_flag = 1;
+let frame_flag;
 let capture_flag = true;
+let delay_velocity = false;
 const ScoreThreshold = 0.4;
 
 // Initialize for MoveNet model
@@ -50,18 +51,24 @@ async function setup() {
 async function getPoses(){ 
   poses = await detector.estimatePoses(video.elt);
   if (poses && poses.length > 0){
-    // Re-check whether Objection Stand up after fall condition
-    if(condition_1 != true || condition_2 || true && condition_3 || true){
-      Fall = 0;
-    }
-    if(condition_1 == true){
-      if(condition_2 == true ){
-        if(condition_3 == true){
-          Fall = 1;
+    for (let kp of poses[0].keypoints){
+      const {x, y, score } = kp;
+      if (score > ScoreThreshold) {
+      // Re-check whether Objection Stand up after fall condition
+      if(condition_2 != true && condition_3 != true){
+        Fall = 0;
+      }
+      if(condition_1 == true){
+        if (condition_2 == true){
+          if (condition_3 == true){
+            Fall = 1;
+            // save(cnv,getTimeStamp() + '.jpg');
+          } 
         } 
       }
+      getCoordination();
+      }
     }
-    getCoordination();
   }
   setTimeout(getPoses, timer);
   checkCondition1();
@@ -71,11 +78,14 @@ async function getPoses(){
 
   // Set for first condition
 function checkCondition1(){
-  frame_flag = y_nose;
-  vel = abs((frame_flag - frame1)/0.25);
+  frame_flag = mid_hip;
+  if (frame_flag > frame1){
+    vel = abs((frame_flag - frame1)*0.0002645833);
+  }
   if(vel > 0.009){
     condition_1 = true;
-  }else {
+    delay_velocity = true;
+  } else {
     condition_1 = false;
   }
 }
@@ -88,7 +98,6 @@ function checkCondition2(){
     condition_2 = false;
   }
 }
-
   //set for third condition
 function checkCondition3() {
   p = weight_body/height_body;
@@ -100,8 +109,8 @@ function checkCondition3() {
 }
 function getCoordination (){
     // Check Angle of objection
-    oppsiteSide = Math.abs(x_kneeTB - x_nose);
-    adjacentSide = Math.abs(y_kneeTB - y_nose);
+    oppsiteSide = Math.abs(x_ankleTB - x_nose);
+    adjacentSide = Math.abs(y_ankleTB - y_nose);
     angle = (Math.atan(adjacentSide/oppsiteSide))*180/ PI;
 
     // Check height and weight of objection
@@ -190,9 +199,12 @@ function draw() {
   background(220);
   image(video, 0, 0);
   if (poses && poses.length > 0) {
-    frame1 = frame_flag;
     for (let kp of poses[0].keypoints){
       const {x, y, score } = kp;
+      if (score > ScoreThreshold) {
+        // text("Score = " + score, 50, 270);
+        frame1 = frame_flag;
+      }
     }
     // Set color for skeleton
     stroke('yellow');
@@ -206,14 +218,19 @@ function draw() {
     }
   }
   stroke(0);
+  textSize(20);
+  fill(0,255,0);
+  text("Velocity = " + vel, 50, 120);
+  text("Angle = " + angle, 50, 170);
+  text("P = " + p, 50, 220);
   if(Fall == 1) {
     fill(255,0,0);
     textSize(32);
     text('Fall Detection', 50, 50);
     if(capture_flag == true){
       save(cnv,getTimeStamp() + '.jpg');
-      sendMail();
-      // console.log(getTimeStamp() + '.jpg');
+      // sendMail();
+      console.log(getTimeStamp() + '.jpg');
       capture_flag = false;
     } 
   }

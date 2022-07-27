@@ -10,11 +10,33 @@ let loaded = false;
 //Set position of frame. Default is 1
 let img_pos = 1;
 //Set VideoName need to extract
-let vid = 220;
+let vid ;
 //Set final video need to extract
-let limit_video = 220;
+let limit_video;
 //Set folder that stored frame! 
-const folder = 'TestFrame/video';
+const folder = 'Frames/video';
+
+function getSearchParameters() {
+    var prmstr = window.location.search.substr(1);
+    return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+  }
+  
+  function transformToAssocArray( prmstr ) {
+    var params = {};
+    var prmarr = prmstr.split("&");
+    for ( var i = 0; i < prmarr.length; i++) {
+        var tmparr = prmarr[i].split("=");
+        params[tmparr[0]] = tmparr[1];
+    }
+    return params;
+  }
+  
+var params = getSearchParameters();
+console.log(params);
+img_pos = parseInt(params.firstFrame);
+vid = parseInt(params.firstVideo);
+limit_video = parseInt(params.finalVideo);
+timer = parseInt(params.timer);
 
 //Set Model SINGLEPOSE_LIGHTNING , SINGLEPOSE_THUNDER, MULTIPOSE_LIGHTNING
 

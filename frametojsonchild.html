@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head>
+    <script src="p5.js"></script>
+    <script src="https://unpkg.com/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
+    <!-- Require the peer dependencies of pose-detection. -->
+    <script src="tfjs-core"></script>
+    <script src="tfjs-converter"></script>
+
+    <!-- You must explicitly require a TF.js backend if you're not using the TF.js union bundle. -->
+    <script src="tfjs-backend-webgl"></script>
+    <!-- Alternatively you can use the WASM backend: <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/tf-backend-wasm.js"></script> -->
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="pose-detection"></script>
+    <script src="navigation.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+  </head>
+  <body style="margin: 30px;">
+    <title>Welcome to Fall Detection system</title>
+    <!-- <script src="sketch_realtime.js"></script> -->
+    <script src="sketch_extractJson.js"></script>
+    <!-- <script src="sketch_extractFrameVideo.js"></script> -->
+    
+    <h1>Fall Detection using Movenet Model</h1>
+    <p>Please select an option for demo:</p>
+    <select id="mySelect" onchange="changeScript()">
+      <option value="home">0. Home</option>
+      <option value="extFrame"  >1. Extract from Video to Frames</option>
+      <option value="extJson" selected = 'true' >2. Extract from Frames to Json files</option>
+      <option value="realtime">3. Fall Detection Realtime</option>
+    </select>
+
+    <p id="files">JSons are extracting.... </p>
+
+</body></html>
